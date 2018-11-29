@@ -62,7 +62,13 @@ module.exports = function(filename, serverless) {
           if (ignoreMissing(moduleName)) {
             return;
           }
-          throw new Error(`[serverless-plugin-include-dependencies]: Could not find ${moduleName}`);
+          try {
+            // support named dependencies, e.g. something like `import * from 'my/local/dep/bla.js';`
+            // which incorrectly is assumed to be in a package named `my`.
+            require.resolve(name);
+          } catch(e) {
+            throw new Error(`[serverless-plugin-include-dependencies]: Could not find ${moduleName}`);
+          }
         }
       }
     });
